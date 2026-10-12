@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perpustakaan Dongeng Anak - Interaktif</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --langit: #e6f3ff;
+    --navy: #1b2a4e;
+    --mentari: #ffc93c;
+    --rumput: #2fa96b;
+    --koral: #e8575a;
+    --garis: #c9d8ef;
+    --ungu: #8b5cf6;
+  }
+  body {
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f3ff 100%);
+    color: var(--navy);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(3deg); }
+  }
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 15px rgba(255, 201, 60, 0.4); }
+    50% { box-shadow: 0 0 25px rgba(255, 201, 60, 0.8); }
+  }
+  .glow-btn {
+    animation: pulse-glow 2s infinite;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--garis);
+    border-radius: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+</style>
+</head>
+<body class="selection:bg-amber-200 selection:text-amber-900">
+
+<header class="bg-[#1b2a4e] text-white shadow-md border-b-8 border-[#ffc93c] sticky top-0 z-50">
+  <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
+    <div class="flex items-center space-x-2 cursor-pointer" onclick="tampilkanBeranda()">
+      <span class="text-3xl animate-bounce">📚</span>
+      <div>
+        <h1 class="text-lg md:text-xl font-extrabold tracking-wide leading-tight">Perpustakaan Dongeng</h1>
+        <p class="text-xs text-amber-300 font-medium">Cerita Rakyat Nusantara Interaktif</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button onclick="toggleAudioBGM()" id="btnBGM" title="Musik Suasana" class="bg-white/10 hover:bg-white/20 p-2 rounded-xl text-sm font-bold transition flex items-center gap-1 border border-white/20">
+        🎵 <span class="hidden sm:inline" id="bgmText">Musik: Mati</span>
+      </button>
+      <button onclick="tampilkanFavorit()" class="bg-white/10 hover:bg-white/20 p-2 rounded-xl text-sm font-bold transition flex items-center gap-1 border border-white/20">
+        ⭐ <span class="hidden sm:inline">Favorit</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="app" class="max-w-2xl w-full mx-auto p-4 flex-1 flex flex-col justify-center my-auto">
+  <!-- Dynamic content will be injected here -->
+</main>
+
+<footer class="text-center py-4 text-xs text-slate-500 font-semibold">
+  ✨ Belajar Sambil Membaca • Dibuat dengan Kasih Sayang untuk Anak Indonesia 🇮🇩
+</footer>
+
+<script>
+/* ================= DATA LENGKAP 3 BUKU (10 HALAMAN MASING-MASING) ================= */
+const PERPUSTAKAAN = {
+  1: {
+    judulBuku: "Timun Mas",
+    coverIkon: "👵",
+    deskripsi: "Kisah perjuangan gadis pemberani melawan raksasa sakti menggunakan benda-benda ajaib.",
+    warna: "from-amber-400 to-orange-500",
+    halaman: [
+      { hal: 1, judul: "Janda yang Kesepian", teks: "Dahulu kala, hiduplah seorang wanita paruh baya bernama Mbok Srini di dekat hutan. Ia hidup seorang diri dan sangat mendambakan seorang anak.", ikon: "👵" },
+      { hal: 2, judul: "Pertemuan dengan Raksasa", teks: "Suatu hari, Mbok Srini bertemu raksasa sakti di hutan. Raksasa itu memberikannya biji mentimun dengan syarat, jika anak yang lahir sudah besar, harus diserahkan kembali.", ikon: "👹" },
+      { hal: 3, judul: "Kelahiran Timun Mas", teks: "Mbok Srini menanam biji itu di ladang. Tak lama kemudian, tumbuhlah buah mentimun emas yang besar, dan di dalamnya terdapat bayi perempuan cantik.", ikon: "👶" },
+      { hal: 4, judul: "Timun Mas Tumbuh Dewasa", teks: "Tahun demi tahun berlalu. Timun Mas tumbuh menjadi anak yang cerdas, baik hati, dan sangat berbakti kepada ibunya.", ikon: "👧" },
+      { hal: 5, judul: "Datangnya Sang Raksasa", teks: "Tiba-tiba, bumi bergemetar. Raksasa datang menagih janji untuk membawa Timun Mas. Mbok Srini sangat ketakutan.", ikon: "🌳" },
+      { hal: 6, judul: "Bekti Pemberian Pertapa", teks: "Sebelumnya, Mbok Srini sempat diberi empat kantong kecil berisi biji mentimun, jarum, garam, dan terasi oleh seorang petapa sakti.", ikon: "💰" },
+      { hal: 7, judul: "Senjata Pertama: Biji Mentimun", teks: "Saat dikejar raksasa, Timun Mas melemparkan biji mentimun. Seketika hutan berubah menjadi ladang mentimun lebat yang menjerat kaki raksasa.", ikon: "🥒" },
+      { hal: 8, judul: "Senjata Kedua & Ketiga: Jarum & Garam", teks: "Timun Mas melemparkan jarum yang berubah menjadi hutan bambu tajam, lalu garam yang mengubah tanah menjadi lautan luas yang dalam.", ikon: "🌊" },
+      { hal: 9, judul: "Senjata Terakhir: Terasi Ajaib", teks: "Dalam keputusasaan terakhir, Timun Mas melemparkan terasi yang seketika berubah menjadi lautan lumpur mendidih dan menelan raksasa.", ikon: "🌋" },
+      { hal: 10, judul: "Akhir yang Bahagia", teks: "Raksasa berhasil dikalahkan selamanya. Timun Mas kembali ke rumah dan hidup bahagia bersama ibunya tercinta selamanya.", ikon: "✨" }
+    ]
+  },
+  2: {
+    judulBuku: "Malin Kundang",
+    coverIkon: "🚢",
+    deskripsi: "Pesan moral tentang anak yang durhaka kepada ibu kandungnya setelah menjadi saudagar kaya.",
+    warna: "from-blue-400 to-indigo-600",
+    halaman: [
+      { hal: 1, judul: "Anak yang Miskin", teks: "Dahulu kala di sebuah perkampungan nelayan, hiduplah seorang anak bernama Malin bersama ibunya yang sudah tua dan hidup miskin.", ikon: "⛵" },
+      { hal: 2, judul: "Keinginan Merantau", teks: "Malin ingin mengubah nasib keluarganya agar hidup makmur. Ia meminta izin kepada ibunya untuk ikut merantau dengan kapal besar saudagar.", ikon: "📜" },
+      { hal: 3, judul: "Berlayar Jauh", teks: "Bertahun-tahun Malin merantau di tanah seberang. Berkat kerja kerasnya, ia kini menjadi saudagar kaya raya yang memiliki banyak kapal dagang.", ikon: "💰" },
+      { hal: 4, judul: "Menikah dengan Putri Bangsawan", teks: "Malin juga menikah dengan seorang putri bangsawan yang sangat cantik jelita di tempat perantauannya yang megah.", ikon: "👑" },
+      { hal: 5, judul: "Berlabuh di Kampung Halaman", teks: "Suatu hari, kapal besar Malin berlabuh di pantai tempat ia dilahirkan untuk berdagang dan memamerkan kekayaannya.", ikon: "⚓" },
+      { hal: 6, judul: "Ibu yang Rindu", teks: "Ibu Malin mendengar kedatangan anaknya. Dengan tergopoh-gopoh dan penuh air mata rindu, ia datang ke pantai untuk menemui Malin.", ikon: "👵" },
+      { hal: 7, judul: "Malin Merasa Malu", teks: "Malin merasa sangat malu kepada istri bangsawan dan para pengikutnya saat melihat ibunya yang berpakaian sangat sederhana.", ikon: "😔" },
+      { hal: 8, judul: "Mengingkari Ibu Kandung", teks: "Dengan kejam, Malin mendorong ibunya jatuh ke pasir dan mengaku di depan umum bahwa ia tidak mengenal wanita tua miskin itu.", ikon: "💔" },
+      { hal: 9, judul: "Sumpah Sang Ibu", teks: "Ibu Malin sangat sakit hati dan menangis pilu, lalu berdoa kepada Tuhan agar anaknya yang durhaka diberi hukuman yang setimpal.", ikon: "🤲" },
+      { hal: 10, judul: "Kutukan Menjadi Batu", teks: "Tiba-tiba badai dahsyat menerjang kapal Malin. Tubuhnya kaku membatu sebagai kutukan abadi bagi anak yang durhaka kepada ibu.", ikon: "🗿" }
+    ]
+  },
+  3: {
+    judulBuku: "Sangkuriang",
+    coverIkon: "⛰️",
+    deskripsi: "Legenda terciptanya Gunung Tangkuban Perahu akibat cinta terlarang dan kesaktian masa lalu.",
+    warna: "from-emerald-400 to-teal-700",
+    halaman: [
+      { hal: 1, judul: "Dayang Sumbi & Tumang", teks: "Dahulu kala di Tanah Pasundan, hiduplah seorang putri cantik bernama Dayang Sumbi dan anjing setianya yang bernama Tumang.", ikon: "🐕" },
+      { hal: 2, judul: "Kelahiran Sangkuriang", teks: "Suatu hari, alat tenun Dayang Sumbi terjatuh. Karena malas mengambil, ia bersumpah siapa pun yang mengambilkan akan dijadikan suami atau saudara.", ikon: "🏹" },
+      { hal: 3, judul: "Sangkuriang Berburu", teks: "Dari takdir itu lahirlah Sangkuriang, anak sakti dan cerdas. Ia sering berburu di hutan bersama Tumang tanpa tahu anjing itu ayahnya.", ikon: "👦" },
+      { hal: 4, judul: "Marahnya Sangkuriang", teks: "Suatu hari, karena tidak mendapat rusa untuk dibawa pulang, Sangkuriang terpaksa memanah Tumang atas perintah kesal, lalu membawa hatinya.", ikon: "🌲" },
+      { hal: 5, judul: "Kebenaran Terungkap", teks: "Dayang Sumbi murka besar mengetahui hati yang dimakannya adalah hati Tumang. Ia memukul kepala Sangkuriang hingga terluka dan mengusirnya.", ikon: "⚡" },
+      { hal: 6, judul: "Pertemuan Kembali", teks: "Bertahun-tahun kemudian, Sangkuriang tumbuh dewasa dan sakti mandraguna. Tanpa sengaja, ia kembali dan jatuh cinta pada Dayang Sumbi yang awet muda.", ikon: "💫" },
+      { hal: 7, judul: "Syarat dari Dayang Sumbi", teks: "Menyadari pemuda itu adalah anaknya, Dayang Sumbi mengajukan syarat mustahil: membuat telaga dan perahu besar dalam semalam sebelum fajar.", ikon: "🛶" },
+      { hal: 8, judul: "Bantuan Makhluk Halus", teks: "Dengan kesaktiannya dan bantuan para jin pengikutnya, Sangkuriang mulai membendung Sungai Citarum dan mengerjakan perahu dengan sangat cepat.", ikon: "👻" },
+      { hal: 9, judul: "Fajar Palsu", teks: "Khawatir syarat itu terpenuhi, Dayang Sumbi membentangkan kain panjang merah di timur untuk mengelabui ayam jantan agar berkokok lebih cepat.", ikon: "🌅" },
+      { hal: 10, judul: "Terbentuknya Tangkuban Perahu", teks: "Merasa gagal dan tertipu muslihat, Sangkuriang mengamuk lalu menendang perahu besar buatannya hingga terbalik, membentuk Gunung Tangkuban Perahu.", ikon: "🌋" }
+    ]
+  }
+};
+
+let bukuAktif = null;
+let halamanAktif = 0;
+let ukuranTeks = 17; // px
+let isBGMPlaying = false;
+let audioCtx = null;
+let bgmInterval = null;
+
+/* ================= AUDIO & SFX (WEB AUDIO API) ================= */
+function playClickSound() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.08);
+  } catch (e) {}
+}
+
+function playChimeSound() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+    notes.forEach((freq, idx) => {
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.1 + 0.4);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime + idx * 0.1);
+      osc.stop(audioCtx.currentTime + idx * 0.1 + 0.4);
+    });
+  } catch (e) {}
+}
+
+function toggleAudioBGM() {
+  isBGMPlaying = !isBGMPlaying;
+  let btnText = document.getElementById("bgmText");
+  if (isBGMPlaying) {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    btnText.innerText = "Musik: Hidup";
+    playBGMNote();
+    bgmInterval = setInterval(playBGMNote, 4000);
+  } else {
+    btnText.innerText = "Musik: Mati";
+    if (bgmInterval) clearInterval(bgmInterval);
+  }
+}
+
+function playBGMNote() {
+  if (!isBGMPlaying) return;
+  try {
+    let chord = [261.63, 329.63, 392.00]; // C major chord
+    chord.forEach(f => {
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.5);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 3.5);
+    });
+  } catch(e) {}
+}
+
+/* ================= VIEW RENDERING FUNCTIONS ================= */
+
+function tampilkanBeranda() {
+  bukuAktif = null;
+  halamanAktif = 0;
+  window.speechSynthesis.cancel();
+  playClickSound();
+
+  let opsiDropdown = `<option value="">-- Pilih Buku Cerita Cepat (1-3) --</option>`;
+  for (let id in PERPUSTAKAAN) {
+    opsiDropdown += `<option value="${id}">${id}. ${PERPUSTAKAAN[id].judulBuku}</option>`;
+  }
+
+  let daftarCover = "";
+  for (let id in PERPUSTAKAAN) {
+    let b = PERPUSTAKAAN[id];
+    let savedProgress = localStorage.getItem(`dongeng_hal_${id}`) || 0;
+    let progressPercent = Math.round((parseInt(savedProgress) + 1) / b.halaman.length * 100);
+
+    daftarCover += `
+      <div class="bg-white border-2 border-[#c9d8ef] hover:border-[#ffc93c] rounded-2xl p-4 text-left cursor-pointer transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md flex items-center gap-4 group" onclick="bukaBuku(${id})">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br ${b.warna} flex items-center justify-center text-3xl shadow-inner group-hover:scale-105 transition">
+          ${b.coverIkon}
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full">Buku ${id}</span>
+            <span class="text-xs text-slate-400 font-bold">Progres: ${progressPercent}%</span>
+          </div>
+          <h3 class="text-lg font-extrabold text-[#1b2a4e] group-hover:text-blue-600 transition">${b.judulBuku}</h3>
+          <p class="text-xs text-slate-500 line-clamp-1">${b.deskripsi}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById("app").innerHTML = `
+    <div class="bg-white border-2 border-[#c9d8ef] rounded-3xl p-6 text-center shadow-xl">
+      <div class="inline-block p-3 bg-amber-100 rounded-2xl text-4xl mb-2 animate-float">🏰</div>
+      <h2 class="text-2xl font-extrabold text-[#1b2a4e] mb-1">Pilih Dongeng Favoritmu</h2>
+      <p class="text-sm text-slate-600 mb-5">Temukan petualangan seru dan pesan moral di setiap cerita rakyat!</p>
+      
+      <div class="mb-5">
+        <select id="pilihDropdown" onchange="pilihDariDropdown(this.value)" class="w-full p-3.5 font-bold border-2 border-[#c9d8ef] rounded-2xl text-[#1b2a4e] bg-slate-50 focus:outline-none focus:border-amber-400 transition cursor-pointer">
+          ${opsiDropdown}
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        ${daftarCover}
+      </div>
+    </div>
+  `;
+}
+
+function pilihDariDropdown(id) {
+  if (id) bukaBuku(id);
+}
+
+function bukaBuku(id) {
+  playClickSound();
+  bukuAktif = PERPUSTAKAAN[id];
+  let saved = localStorage.getItem(`dongeng_hal_${id}`);
+  halamanAktif = saved ? parseInt(saved) : 0;
+  if (halamanAktif >= bukuAktif.halaman.length) halamanAktif = 0;
+  renderHalaman();
+}
+
+function renderHalaman() {
+  if (!bukuAktif) return;
+  let c = bukuAktif.halaman[halamanAktif];
+  let totalHal = bukuAktif.halaman.length;
+  let progressPct = ((halamanAktif + 1) / totalHal) * 100;
+
+  // Simpan progres baca
+  let bukuIdKey = Object.keys(PERPUSTAKAAN).find(k => PERPUSTAKAAN[k].judulBuku === bukuAktif.judulBuku);
+  if (bukuIdKey) {
+    localStorage.setItem(`dongeng_hal_${bukuIdKey}`, halamanAktif);
+  }
+
+  document.getElementById("app").innerHTML = `
+    <div class="bg-white border-2 border-[#c9d8ef] rounded-3xl p-5 md:p-6 shadow-xl relative overflow-hidden">
+      <!-- Top Navigation & Progress -->
+      <div class="flex justify-between items-center mb-4">
+        <button class="bg-slate-100 hover:bg-slate-200 text-[#1b2a4e] font-bold py-2 px-3.5 rounded-xl text-xs md:text-sm flex items-center gap-1 transition" onclick="tampilkanBeranda()">
+          ⬅ Menu Utama
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="aturUkuranFont(-2)" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg font-bold text-xs" title="Kecilkan Teks">A-</button>
+          <button onclick="aturUkuranFont(2)" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg font-bold text-xs" title="Besarkan Teks">A+</button>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="w-full bg-slate-100 h-2.5 rounded-full mb-4 overflow-hidden">
+        <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
+      </div>
+
+      <div class="flex justify-between items-center text-xs font-bold text-slate-400 mb-2">
+        <span>📖 ${bukuAktif.judulBuku}</span>
+        <span>Halaman ${c.hal} dari ${totalHal}</span>
+      </div>
+
+      <!-- Illustration Card -->
+      <div class="bg-gradient-to-b from-sky-50 to-blue-50 border-2 border-dashed border-blue-200 rounded-2xl p-6 text-center my-4">
+        <div class="text-6xl md:text-7xl mb-2 animate-float inline-block">${c.ikon}</div>
+        <h2 class="text-xl md:text-2xl font-extrabold text-[#1b2a4e]">${c.judul}</h2>
+      </div>
+
+      <!-- Story Text -->
+      <p id="teks-cerita" class="text-slate-700 leading-relaxed font-medium mb-6 text-center px-2" style="font-size: ${ukuranTeks}px;">
+        ${c.teks}
+      </p>
+
+      <!-- TTS Narration Button -->
+      <button class="w-full bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-extrabold py-3 px-4 rounded-2xl flex items-center justify-center gap-2 mb-4 transition border-2 border-emerald-300 shadow-sm" onclick="bacaNarasi()">
+        🔊 Putar Suara Narasi Cerita
+      </button>
+
+      <!-- Pagination Buttons -->
+      <div class="flex gap-3">
+        <button class="flex-1 bg-slate-100 hover:bg-slate-200 text-[#1b2a4e] font-bold py-3 px-4 rounded-2xl transition disabled:opacity-30 disabled:cursor-not-allowed" ${halamanAktif === 0 ? 'disabled' : ''} onclick="ubahHal(-1)">
+          ◀ Sebelumnya
+        </button>
+        <button class="flex-1 bg-[#ffc93c] hover:bg-amber-400 text-[#1b2a4e] font-extrabold py-3 px-4 rounded-2xl transition shadow-md glow-btn" onclick="ubahHal(1)">
+          ${halamanAktif === totalHal - 1 ? 'Selesai Membaca 🎉' : 'Selanjutnya ▶'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function ubahHal(arah) {
+  window.speechSynthesis.cancel();
+  playClickSound();
+  halamanAktif += arah;
+  let totalHal = bukuAktif.halaman.length;
+
+  if (halamanAktif >= totalHal) {
+    playChimeSound();
+    tampilkanSelamatSelesai();
+    return;
+  }
+  if (halamanAktif < 0) {
+    halamanAktif = 0;
+  }
+  renderHalaman();
+}
+
+function aturUkuranFont(delta) {
+  playClickSound();
+  ukuranTeks += delta;
+  if (ukuranTeks < 14) ukuranTeks = 14;
+  if (ukuranTeks > 26) ukuranTeks = 26;
+  let el = document.getElementById("teks-cerita");
+  if (el) el.style.fontSize = ukuranTeks + "px";
+}
+
+function bacaNarasi() {
+  window.speechSynthesis.cancel();
+  if (!bukuAktif) return;
+  let teks = bukuAktif.halaman[halamanAktif].teks;
+  let narasi = new SpeechSynthesisUtterance(teks);
+  narasi.lang = 'id-ID';
+  narasi.rate = 0.9;
+  window.speechSynthesis.speak(narasi);
+}
+
+function tampilkanSelamatSelesai() {
+  document.getElementById("app").innerHTML = `
+    <div class="bg-white border-2 border-emerald-300 rounded-3xl p-8 text-center shadow-xl">
+      <div class="text-7xl mb-4 animate-bounce">🏆</div>
+      <h2 class="text-2xl font-extrabold text-[#1b2a4e] mb-2">Hebat Sekali!</h2>
+      <p class="text-slate-600 mb-6 font-medium">Kamu telah menyelesaikan membaca cerita <strong class="text-emerald-700">${bukuAktif.judulBuku}</strong> sampai halaman terakhir.</p>
+      
+      <div class="flex flex-col gap-3">
+        <button onclick="bukaBuku(${Object.keys(PERPUSTAKAAN).find(k => PERPUSTAKAAN[k].judulBuku === bukuAktif.judulBuku)})" class="bg-[#ffc93c] hover:bg-amber-400 text-[#1b2a4e] font-extrabold py-3.5 px-6 rounded-2xl shadow-md transition">
+          🔄 Baca Ulang Cerita Ini
+        </button>
+        <button onclick="tampilkanBeranda()" class="bg-slate-100 hover:bg-slate-200 text-[#1b2a4e] font-bold py-3.5 px-6 rounded-2xl transition">
+          📚 Pilih Dongeng Lainnya
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function tampilkanFavorit() {
+  playClickSound();
+  document.getElementById("app").innerHTML = `
+    <div class="bg-white border-2 border-[#c9d8ef] rounded-3xl p-6 text-center shadow-xl">
+      <div class="text-4xl mb-2">⭐</div>
+      <h2 class="text-xl font-extrabold text-[#1b2a4e] mb-2">Koleksi Favorit & Progres</h2>
+      <p class="text-sm text-slate-600 mb-6">Semua buku cerita dongeng nusantara siap dibaca kapan saja.</p>
+      
+      <div class="flex flex-col gap-3 mb-6">
+        <div class="p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl text-left flex justify-between items-center">
+          <div>
+            <h4 class="font-extrabold text-[#1b2a4e]">👵 Timun Mas</h4>
+            <p class="text-xs text-slate-500">Halaman tersimpan: ${parseInt(localStorage.getItem('dongeng_hal_1') || 0) + 1} / 10</p>
+          </div>
+          <button onclick="bukaBuku(1)" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 px-4 rounded-xl shadow">Lanjut</button>
+        </div>
+        <div class="p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl text-left flex justify-between items-center">
+          <div>
+            <h4 class="font-extrabold text-[#1b2a4e]">🚢 Malin Kundang</h4>
+            <p class="text-xs text-slate-500">Halaman tersimpan: ${parseInt(localStorage.getItem('dongeng_hal_2') || 0) + 1} / 10</p>
+          </div>
+          <button onclick="bukaBuku(2)" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 px-4 rounded-xl shadow">Lanjut</button>
+        </div>
+        <div class="p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl text-left flex justify-between items-center">
+          <div>
+            <h4 class="font-extrabold text-[#1b2a4e]">⛰️ Sangkuriang</h4>
+            <p class="text-xs text-slate-500">Halaman tersimpan: ${parseInt(localStorage.getItem('dongeng_hal_3') || 0) + 1} / 10</p>
+          </div>
+          <button onclick="bukaBuku(3)" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 px-4 rounded-xl shadow">Lanjut</button>
+        </div>
+      </div>
+
+      <button onclick="tampilkanBeranda()" class="w-full bg-[#ffc93c] hover:bg-amber-400 text-[#1b2a4e] font-extrabold py-3.5 px-6 rounded-2xl shadow transition">
+        ⬅ Kembali ke Menu Utama
+      </button>
+    </div>
+  `;
+}
+
+// Inisialisasi awal saat halaman dimuat
+window.onload = function() {
+  tampilkanBeranda();
+};
+</script>
+
+</body>
+</html>
